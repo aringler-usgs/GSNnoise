@@ -72,7 +72,7 @@ def getspectra(string):
 if __name__ == "__main__":
     debug = True
     network = 'IC'
-    for year in range(2015,1988,-1):
+    for year in range(2009,1988,-1):
         year = str(year)
         for jday in range(001,367):
             strings = []

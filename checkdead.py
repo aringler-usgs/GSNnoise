@@ -8,6 +8,8 @@ import numpy as np
 from obspy.signal.spectral_estimation import get_NLNM
 import matplotlib.pyplot as plt
 
+from multiprocessing import Pool
+
 debug = True
 
 
@@ -21,17 +23,11 @@ micNLNM = NLNM[(minper <= per) & (per <= maxper)]
 micper = per[(minper <= per) & (per <= maxper)]
 
 
-# Grab a station and look for dead channel days
-year = '2015'
-sta = 'ANMO'
-chan = 'LHZ'
-loc = '00'
-
-files = glob.glob('/TEST_ARCHIVE/PSDS/' + sta + '/' + year + '/*' + loc + '_' + chan + '*') 
 
 
-for idx, curfile  in enumerate(files):
-    print 'We are ' + str(float(idx)/float(len(files))*100) + '% done'
+fDead = open('DeadChannels','w')
+
+def checkifdead(curfile):
     try:
 
         with open(curfile,'r') as f:
@@ -52,13 +48,26 @@ for idx, curfile  in enumerate(files):
         #plt.show()
         dbdiff = 1./float(len(NLNMinterp))*sum(stapow-NLNMinterp)
         if dbdiff <= 0.:
-            print curfile + ' is dead with dB difference ' + str(dbdiff)
-
-
-        
+            fDead.write(curfile + ' is dead with dB difference ' + str(dbdiff) + '\n')
     
     except:
         print curfile + ' is bad'
+
+    return
+
+pool = Pool(10)
+for year in range(1989,2016):
+    for days in range(1,367):
+        print 'On ' + str(year) + ' ' + str(days).zfill(3)
+        files = glob.glob('/TEST_ARCHIVE/PSDS/*/' + str(year) + '/PSD*' + str(days).zfill(3)) 
+        pool.map(checkifdead,files)
+
+
+
+
+
+
+
 
 
 
