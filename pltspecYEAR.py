@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from multiprocessing import Pool
 
+path = '/TEMP_TEST/PSDS/'
 
 
 # Grab the NLNM and get power and per in the microseism band
@@ -52,8 +53,9 @@ def getPercentile(snst):
     chan = snst.split('.')[2]
     loc = snst.split('.')[1]
     sta = snst.split('.')[0]
-    files = glob.glob('/TEST_ARCHIVE/PSDS/' + sta + '/' + year + '/*' + loc + '_' + chan + '*_00*')
+    files = glob.glob(path + sta + '/' + year + '/*' + loc + '_' + chan + '*')
     for idx, curfile in enumerate(files):
+        print 'On ' + sta  + ' ' + loc + ' ' + chan + ' ' + year + ' ' + str(100*float(idx)/float(len(files))) + '%' 
         if checkAlive(curfile):
             power = []
             period =[]
@@ -66,31 +68,41 @@ def getPercentile(snst):
             else:
                 powerArray = np.vstack((powerArray,np.asarray(power)))
 
-
-    # We Now have an array of all the powers and periods  
-    (files, length) = powerArray.shape     
-    # Grab the 1st, 5th, 25th, and 50th        
-    percentiles = np.empty([4,length])
-    for idx in range(0,length):
-        percentils[0,idx]=np.percentile(powerArray[:,idx],1.)
-        percentils[1,idx]=np.percentile(powerArray[:,idx],5.)
-        percentils[2,idx]=np.percentile(powerArray[:,idx],25.)
-        percentils[3,idx]=np.percentile(powerArray[:,idx],50.)
-
-    print(percentiles)
-
+    if 'powerArray' in vars():
+        # We Now have an array of all the powers and periods  
+        (numfiles, length) = powerArray.shape     
+        # Grab the 1st, 5th, 25th, and 50th        
+        #percentiles = np.empty([4,length])
+        fw = open('results/' + sta + loc + chan + year + 'percentile','w')
+        fw.write('period, 1st, 5th, 25th, 50th \n')
+        for idx in range(0,length):
+            fw.write(str(period[idx]) + ', ' + str(np.percentile(powerArray[:,idx],1.)) + ', ' + \
+                    str(np.percentile(powerArray[:,idx],5.)) + ', ' + str(np.percentile(powerArray[:,idx],25.)) + \
+                    ', ' + str(np.percentile(powerArray[:,idx],50.)) + '\n')
     
-                
-    return
+    fw.close()    
+    return 
 
 if __name__ == "__main__":
 
-    year = '2000'
-    chan = 'LHZ'
-    sta = 'TUC'
-    loc = '00'
+    # Used for testing
+    #year = '1989'
+    #chan = 'LHZ'
+    #sta = 'HRV'
+    #loc = ''
+    #getPercentile(sta + '.' + loc + '.' + chan + '.' + year)
 
-    getPercentile(sta + '.' + loc + '.' + chan + '.' + year)
+    for year in range(1989,2015):
+        stas = glob.glob(path + '*/' + str(year) + '/PSD*')
+
+    goodsncl = []
+    for val in stas:
+        goodsncl.append(val.split('_')[3] + '.' + val.split('_')[4] + '.' + val.split('_')[5] + '.' + str(year))
+
+    goodsncl = list(set(goodsncl))
+
+    pool = Pool(6)
+    pool.map(getPercentile,goodsncl)
     
 
     
