@@ -25,11 +25,10 @@ micper = per[(minper <= per) & (per <= maxper)]
 
 
 
-fDead = open('DeadChannels','w')
+fDead = open('DeadChannelsAGAIN','w')
 
 def checkifdead(curfile):
     try:
-
         with open(curfile,'r') as f:
             staper=[]
             stapow=[]
@@ -48,19 +47,26 @@ def checkifdead(curfile):
         #plt.show()
         dbdiff = 1./float(len(NLNMinterp))*sum(stapow-NLNMinterp)
         if dbdiff <= 0.:
-            fDead.write(curfile + ' is dead with dB difference ' + str(dbdiff) + '\n')
-    
+            result = curfile + ' is dead with dB difference ' + str(dbdiff) + '\n'
+        else:
+            result = ''
     except:
         print curfile + ' is bad'
-
-    return
+        result = curfile + ' is bad\n'
+    return result
 
 pool = Pool(10)
 for year in range(1989,2016):
     for days in range(1,367):
         print 'On ' + str(year) + ' ' + str(days).zfill(3)
         files = glob.glob('/TEST_ARCHIVE/PSDS/*/' + str(year) + '/PSD*' + str(days).zfill(3)) 
-        pool.map(checkifdead,files)
+        p = pool.map(checkifdead,files)
+        for res in p:
+            if len(res) > 1:
+                fDead.write(res)
+
+
+fDead.close()
 
 
 

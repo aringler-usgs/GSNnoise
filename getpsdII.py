@@ -75,7 +75,7 @@ if __name__ == "__main__":
     network = 'II'
     for year in range(1989,2015):
         year = str(year)
-        for jday in range(246,367):
+        for jday in range(001,247):
             strings = []
             jday = str(jday).zfill(3)
             mdgetOUTPUT = os.popen('mdget -b ' + year + ',' + jday + '-00:00:00 -s \'' + network + '.....[BL]H...\'')
@@ -100,6 +100,6 @@ if __name__ == "__main__":
                 print 'Here are the number of strings: ' + str(len(strings))
                 print 'Here is the day: ' + str(jday) + ' ' + str(year)
             #for string in strings:
-            pool = Pool(14)
+            pool = Pool(18)
             pool.map(getspectra,strings)            
             #getspectra(strings[1])
