@@ -73,7 +73,11 @@ def getPercentile(snst):
         (numfiles, length) = powerArray.shape     
         # Grab the 1st, 5th, 25th, and 50th        
         #percentiles = np.empty([4,length])
-        fw = open('results/' + sta + loc + chan + year + 'percentile','w')
+        if '[12NE]' in chan:
+            chanName = chan[:2] + 'H'
+        else:
+            chanName = chan
+        fw = open('results/' + sta + loc + chanName + year + 'percentile','w')
         fw.write('period, 1st, 5th, 25th, 50th \n')
         for idx in range(0,length):
             fw.write(str(period[idx]) + ', ' + str(np.percentile(powerArray[:,idx],1.)) + ', ' + \
@@ -87,22 +91,25 @@ if __name__ == "__main__":
 
     # Used for testing
     #year = '1989'
-    #chan = 'LHZ'
+    #chan = 'LH[12NE]'
     #sta = 'HRV'
     #loc = ''
     #getPercentile(sta + '.' + loc + '.' + chan + '.' + year)
-
+    #sys.exit()
     for year in range(1989,2015):
         stas = glob.glob(path + '*/' + str(year) + '/PSD*')
 
-    goodsncl = []
-    for val in stas:
-        goodsncl.append(val.split('_')[3] + '.' + val.split('_')[4] + '.' + val.split('_')[5] + '.' + str(year))
+        goodsncl = []
+        for val in stas:
+            chan = val.split('_')[5]
+            if chan[-1] in ['1','2','N','E']:
+                chan = chan[:-1] + '[12NE]'
+            goodsncl.append(val.split('_')[3] + '.' + val.split('_')[4] + '.' + chan + '.' + str(year))
 
-    goodsncl = list(set(goodsncl))
+        goodsncl = list(set(goodsncl))
 
-    pool = Pool(6)
-    pool.map(getPercentile,goodsncl)
+        pool = Pool(6)
+        pool.map(getPercentile,goodsncl)
     
 
     
