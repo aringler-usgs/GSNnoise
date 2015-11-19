@@ -80,7 +80,7 @@ def getPercentile(snst):
                     str(np.percentile(powerArray[:,idx],5.)) + ', ' + str(np.percentile(powerArray[:,idx],25.)) + \
                     ', ' + str(np.percentile(powerArray[:,idx],50.)) + '\n')
     
-    fw.close()    
+        fw.close()    
     return 
 
 if __name__ == "__main__":
